@@ -357,7 +357,6 @@ function CompanyDashboard({
           </div>
           <nav className="workspace-nav">
             <a className="active" href="#directory"><Users size={18} /> Directory</a>
-            <a href="#entry"><Plus size={18} /> Quick Entry</a>
           </nav>
         </aside>
 
