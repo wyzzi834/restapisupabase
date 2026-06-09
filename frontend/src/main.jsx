@@ -1,22 +1,17 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
-  ArrowRight,
-  BarChart3,
-  BookOpen,
   Building2,
   CheckCircle2,
+  Database,
   Edit3,
   GraduationCap,
-  LayoutDashboard,
   Loader2,
   LogOut,
-  Mail,
   Plus,
   RefreshCw,
   Search,
   ShieldCheck,
-  Sparkles,
   Trash2,
   UserPlus,
   Users,
@@ -125,14 +120,13 @@ function App() {
           : authForm;
 
       const data = await api(path, { method: "POST", body: JSON.stringify(payload) });
-
       if (!data.access_token) {
         throw new Error("Akun dibuat, tapi token belum tersedia. Coba login setelah email dikonfirmasi.");
       }
 
       localStorage.setItem("access_token", data.access_token);
       setToken(data.access_token);
-      setMessage("Berhasil masuk.");
+      setMessage("Berhasil masuk ke Wyzzi Campus Suite.");
     } catch (error) {
       setMessage(cleanAuthError(error.message));
     } finally {
@@ -152,7 +146,7 @@ function App() {
 
       setForm(emptyForm);
       setEditingId(null);
-      setMessage(isEditing ? "Data berhasil diubah." : "Data berhasil ditambahkan.");
+      setMessage(isEditing ? "Profil mahasiswa diperbarui." : "Mahasiswa baru ditambahkan.");
       await loadMahasiswa();
     } catch (error) {
       setMessage(cleanAuthError(error.message));
@@ -167,7 +161,7 @@ function App() {
 
     try {
       await api(`/mahasiswa/${id}`, { method: "DELETE" });
-      setMessage(`Data ID ${id} berhasil dihapus.`);
+      setMessage(`Mahasiswa ID ${id} dihapus.`);
       await loadMahasiswa();
     } catch (error) {
       setMessage(cleanAuthError(error.message));
@@ -195,9 +189,9 @@ function App() {
   }
 
   return (
-    <main>
+    <main className={isLoggedIn ? "company-app" : "login-page"}>
       {!isLoggedIn ? (
-        <CompanyProfileAuth
+        <LoginExperience
           authForm={authForm}
           authMode={authMode}
           busy={busy}
@@ -229,7 +223,7 @@ function App() {
       )}
 
       {message && (
-        <div className="toast alert-dark">
+        <div className="toast">
           <CheckCircle2 size={18} />
           <span>{message}</span>
           <button aria-label="Tutup pesan" onClick={() => setMessage("")}>
@@ -241,106 +235,76 @@ function App() {
   );
 }
 
-function CompanyProfileAuth({ authForm, authMode, busy, message, setAuthForm, setAuthMode, submitAuth }) {
+function LoginExperience({ authForm, authMode, busy, message, setAuthForm, setAuthMode, submitAuth }) {
   const isLogin = authMode === "login";
 
   return (
-    <div className="profile-page">
-      <nav className="topbar container">
-        <a className="navbar-brand" href="#home">
-          <span className="brand-logo"><Building2 size={22} /></span>
-          Haka Academic
-        </a>
-        <div className="nav-links">
-          <a href="#services">Layanan</a>
-          <a href="#platform">Platform</a>
-          <a href="#contact">Kontak</a>
-        </div>
-      </nav>
-
-      <section className="hero-section" id="home">
-        <div className="container hero-grid">
-          <div className="hero-copy">
-            <span className="badge-soft"><Sparkles size={16} /> Company Profile</span>
-            <h1>Solusi digital untuk manajemen data akademik.</h1>
-            <p>
-              Haka Academic membantu kampus, lembaga kursus, dan tim administrasi mengelola
-              data mahasiswa melalui aplikasi web yang terhubung ke Supabase dan FastAPI.
-            </p>
-            <div className="hero-actions">
-              <a className="btn btn-primary" href="#platform">
-                Lihat Platform <ArrowRight size={18} />
-              </a>
-              <a className="btn btn-outline" href="#contact">
-                Hubungi Kami
-              </a>
-            </div>
-          </div>
-
-          <form className="auth-panel card" onSubmit={submitAuth}>
-            <div className="card-header">
-              <span className="small-label">{isLogin ? "Member Area" : "Create Access"}</span>
-              <h2>{isLogin ? "Masuk Dashboard" : "Daftar Akun"}</h2>
-            </div>
-
-            <div className="tab-switch" role="tablist" aria-label="Mode autentikasi">
-              <button type="button" className={isLogin ? "active" : ""} onClick={() => setAuthMode("login")}>
-                <ShieldCheck size={16} /> Login
-              </button>
-              <button type="button" className={!isLogin ? "active" : ""} onClick={() => setAuthMode("register")}>
-                <UserPlus size={16} /> Register
-              </button>
-            </div>
-
-            {!isLogin && (
-              <label className="form-group">
-                Nama
-                <input value={authForm.name} onChange={(event) => setAuthForm({ ...authForm, name: event.target.value })} required />
-              </label>
-            )}
-            <label className="form-group">
-              Email
-              <input type="email" value={authForm.email} onChange={(event) => setAuthForm({ ...authForm, email: event.target.value })} required />
-            </label>
-            <label className="form-group">
-              Password
-              <input type="password" value={authForm.password} onChange={(event) => setAuthForm({ ...authForm, password: event.target.value })} required />
-            </label>
-
-            <button className="btn btn-primary full" disabled={busy}>
-              {busy ? <Loader2 className="spin" size={18} /> : isLogin ? <ShieldCheck size={18} /> : <UserPlus size={18} />}
-              {busy ? "Memproses..." : isLogin ? "Login" : "Register"}
-            </button>
-
-            {message && <p className="form-note">{message}</p>}
-          </form>
-        </div>
-      </section>
-
-      <section className="container section-grid" id="services">
-        <InfoCard icon={<GraduationCap size={24} />} title="Academic Data" text="Pusat data mahasiswa untuk kebutuhan administrasi harian." />
-        <InfoCard icon={<ShieldCheck size={24} />} title="Secure Access" text="Akses dashboard memakai Supabase Auth dan bearer token." />
-        <InfoCard icon={<BarChart3 size={24} />} title="Operational View" text="Ringkasan data, pencarian cepat, dan aksi CRUD dalam satu layar." />
-      </section>
-
-      <section className="profile-band" id="platform">
-        <div className="container band-grid">
+    <section className="login-card">
+      <div className="login-showcase">
+        <div className="company-lockup">
+          <span className="logo-mark"><Building2 size={24} /></span>
           <div>
-            <span className="small-label">Platform</span>
-            <h2>Backend FastAPI, frontend React, dan database Supabase.</h2>
+            <strong>Wyzzi Campus Suite</strong>
+            <small>Academic Operations Platform</small>
           </div>
+        </div>
+
+        <div className="showcase-copy">
+          <p className="label">Company Mockup</p>
+          <h1>Student operations, attendance-ready data, and Supabase-backed records.</h1>
           <p>
-            Tampilan ini dibuat seperti company profile modern, tetapi form login tetap langsung
-            memakai endpoint backend lokal agar aplikasi tetap fungsional.
+            Aplikasi ini menjadi portal internal untuk mengelola data mahasiswa dengan
+            autentikasi JWT dan backend FastAPI sebagai API gateway.
           </p>
         </div>
-      </section>
 
-      <footer className="container footer" id="contact">
-        <span><Mail size={16} /> admin@haka-academic.local</span>
-        <span>© 2026 Haka Academic</span>
-      </footer>
-    </div>
+        <div className="showcase-strip">
+          <span><ShieldCheck size={16} /> JWT Session</span>
+          <span><Database size={16} /> Supabase REST</span>
+          <span><Users size={16} /> Student CRM</span>
+        </div>
+      </div>
+
+      <form className="login-panel" onSubmit={submitAuth}>
+        <div className="segmented">
+          <button type="button" className={isLogin ? "active" : ""} onClick={() => setAuthMode("login")}>
+            <ShieldCheck size={16} />
+            Login
+          </button>
+          <button type="button" className={!isLogin ? "active" : ""} onClick={() => setAuthMode("register")}>
+            <UserPlus size={16} />
+            Register
+          </button>
+        </div>
+
+        <div className="panel-heading">
+          <p className="label">Secure Access</p>
+          <h2>{isLogin ? "Masuk ke Console" : "Daftarkan Operator"}</h2>
+        </div>
+
+        {!isLogin && (
+          <label>
+            Nama Operator
+            <input value={authForm.name} onChange={(event) => setAuthForm({ ...authForm, name: event.target.value })} required />
+          </label>
+        )}
+        <label>
+          Email
+          <input type="email" value={authForm.email} onChange={(event) => setAuthForm({ ...authForm, email: event.target.value })} required />
+        </label>
+        <label>
+          Password
+          <input type="password" value={authForm.password} onChange={(event) => setAuthForm({ ...authForm, password: event.target.value })} required />
+        </label>
+
+        <button className="primary-action" disabled={busy}>
+          {busy ? <Loader2 className="spin" size={18} /> : isLogin ? <ShieldCheck size={18} /> : <UserPlus size={18} />}
+          {busy ? "Memproses..." : isLogin ? "Buka Dashboard" : "Buat Akun"}
+        </button>
+
+        {message && <p className="auth-message">{message}</p>}
+      </form>
+    </section>
   );
 }
 
@@ -364,152 +328,155 @@ function CompanyDashboard({
   user,
 }) {
   return (
-    <div className="admin-layout">
-      <aside className="admin-sidebar">
-        <a className="navbar-brand" href="#dashboard">
-          <span className="brand-logo"><BookOpen size={22} /></span>
-          Haka Admin
-        </a>
-
-        <nav className="side-nav">
-          <a className="active" href="#dashboard"><LayoutDashboard size={18} /> Dashboard</a>
-          <a href="#data"><Users size={18} /> Mahasiswa</a>
-        </nav>
-
-        <div className="profile-mini">
-          <span>Akun aktif</span>
-          <strong>{user?.name || user?.email || "Authenticated"}</strong>
-          <small>{user?.email || "JWT session"}</small>
-        </div>
-      </aside>
-
-      <section className="admin-main" id="dashboard">
-        <header className="admin-header">
+    <>
+      <header className="company-topbar">
+        <div className="company-lockup compact">
+          <span className="logo-mark"><Building2 size={22} /></span>
           <div>
-            <span className="small-label">Management Console</span>
-            <h1>Dashboard Mahasiswa</h1>
+            <strong>Wyzzi Campus Suite</strong>
+            <small>Internal Console</small>
           </div>
-          <div className="header-actions">
-            <button className="btn btn-light square" aria-label="Refresh data" onClick={() => loadMahasiswa()} disabled={busy}>
-              {busy ? <Loader2 className="spin" size={18} /> : <RefreshCw size={18} />}
-            </button>
-            <button className="btn btn-outline" onClick={logout}>
-              <LogOut size={18} /> Logout
-            </button>
+        </div>
+        <div className="topbar-actions">
+          <button className="icon-action" aria-label="Refresh data" onClick={() => loadMahasiswa()} disabled={busy}>
+            {busy ? <Loader2 className="spin" size={18} /> : <RefreshCw size={18} />}
+          </button>
+          <button className="outline-action" onClick={logout}>
+            <LogOut size={18} />
+            Logout
+          </button>
+        </div>
+      </header>
+
+      <section className="company-layout">
+        <aside className="workspace-panel">
+          <div className="workspace-card">
+            <p className="label">Workspace</p>
+            <h2>Academic Ops</h2>
+            <p>{user?.email || "JWT authenticated session"}</p>
           </div>
-        </header>
+          <nav className="workspace-nav">
+            <a className="active" href="#directory"><Users size={18} /> Directory</a>
+            <a href="#entry"><Plus size={18} /> Quick Entry</a>
+          </nav>
+        </aside>
 
-        <section className="stats-row">
-          <StatCard label="Total Mahasiswa" value={rows.length} />
-          <StatCard label="Jurusan Terdata" value={totalJurusan} />
-          <StatCard label="Hasil Filter" value={filteredRows.length} />
-        </section>
-
-        <section className="admin-grid">
-          <form className="card editor-card" onSubmit={submitMahasiswa}>
-            <div className="card-title">
-              <div>
-                <span className="small-label">{isEditing ? `ID ${editingId}` : "Form Data"}</span>
-                <h2>{isEditing ? "Edit Mahasiswa" : "Tambah Mahasiswa"}</h2>
-              </div>
-              {isEditing && (
-                <button type="button" className="btn btn-light square" aria-label="Batal edit" onClick={cancelEdit}>
-                  <X size={18} />
-                </button>
-              )}
+        <section className="main-board">
+          <div className="board-hero">
+            <div>
+              <p className="label">Operations Center</p>
+              <h1>Student Directory</h1>
+              <p>Kelola data mahasiswa dengan gaya dashboard company internal.</p>
             </div>
-
-            <label className="form-group">
-              Nama
-              <input value={form.nama} onChange={(event) => setForm({ ...form, nama: event.target.value })} required />
-            </label>
-            <label className="form-group">
-              NIM
-              <input value={form.nim} onChange={(event) => setForm({ ...form, nim: event.target.value })} required />
-            </label>
-            <label className="form-group">
-              Jurusan
-              <input value={form.jurusan} onChange={(event) => setForm({ ...form, jurusan: event.target.value })} required />
-            </label>
-            <button className="btn btn-primary full" disabled={busy}>
-              {busy ? <Loader2 className="spin" size={18} /> : isEditing ? <Edit3 size={18} /> : <Plus size={18} />}
-              {isEditing ? "Simpan Perubahan" : "Tambah Data"}
-            </button>
-          </form>
-
-          <section className="card table-card" id="data">
-            <div className="card-title">
-              <div>
-                <span className="small-label">Supabase Table</span>
-                <h2>Data Mahasiswa</h2>
-              </div>
-              <div className="search-field">
-                <Search size={18} />
-                <input placeholder="Cari nama, nim, jurusan..." value={query} onChange={(event) => setQuery(event.target.value)} />
-              </div>
+            <div className="hero-badge">
+              <GraduationCap size={22} />
+              <span>Supabase Connected</span>
             </div>
+          </div>
 
-            <div className="table-responsive">
-              <table>
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Nama</th>
-                    <th>NIM</th>
-                    <th>Jurusan</th>
-                    <th>Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredRows.map((row) => (
-                    <tr key={row.id}>
-                      <td><span className="badge-id">#{row.id}</span></td>
-                      <td className="fw-bold">{row.nama}</td>
-                      <td>{row.nim}</td>
-                      <td><span className="badge-major">{row.jurusan || "-"}</span></td>
-                      <td>
-                        <div className="table-actions">
-                          <button className="btn btn-light square" aria-label={`Edit ${row.nama}`} onClick={() => startEdit(row)}>
-                            <Edit3 size={17} />
-                          </button>
-                          <button className="btn btn-danger square" aria-label={`Hapus ${row.nama}`} onClick={() => deleteMahasiswa(row.id)}>
-                            <Trash2 size={17} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                  {!filteredRows.length && (
+          <section className="metrics">
+            <MetricCard title="Total Records" value={rows.length} />
+            <MetricCard title="Active Majors" value={totalJurusan} />
+            <MetricCard title="Filtered View" value={filteredRows.length} />
+          </section>
+
+          <section className="ops-grid">
+            <section className="module directory-module" id="directory">
+              <div className="module-head">
+                <div>
+                  <p className="label">Database Table</p>
+                  <h2>Mahasiswa</h2>
+                </div>
+                <div className="search-field">
+                  <Search size={18} />
+                  <input placeholder="Cari mahasiswa..." value={query} onChange={(event) => setQuery(event.target.value)} />
+                </div>
+              </div>
+
+              <div className="table-wrap">
+                <table>
+                  <thead>
                     <tr>
-                      <td colSpan="5" className="empty-row">{busy ? "Memuat data..." : "Tidak ada data yang cocok."}</td>
+                      <th>ID</th>
+                      <th>Nama</th>
+                      <th>NIM</th>
+                      <th>Jurusan</th>
+                      <th>Aksi</th>
                     </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {filteredRows.map((row) => (
+                      <tr key={row.id}>
+                        <td><span className="record-id">#{row.id}</span></td>
+                        <td className="student-name">{row.nama}</td>
+                        <td>{row.nim}</td>
+                        <td><span className="department-chip">{row.jurusan || "-"}</span></td>
+                        <td>
+                          <div className="table-actions">
+                            <button className="icon-action" aria-label={`Edit ${row.nama}`} onClick={() => startEdit(row)}>
+                              <Edit3 size={17} />
+                            </button>
+                            <button className="icon-action delete" aria-label={`Hapus ${row.nama}`} onClick={() => deleteMahasiswa(row.id)}>
+                              <Trash2 size={17} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {!filteredRows.length && (
+                      <tr>
+                        <td colSpan="5" className="empty-state">{busy ? "Memuat data..." : "Belum ada data yang cocok."}</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <form className="module entry-module" id="entry" onSubmit={submitMahasiswa}>
+              <div className="module-head">
+                <div>
+                  <p className="label">{isEditing ? `Record #${editingId}` : "Quick Entry"}</p>
+                  <h2>{isEditing ? "Update Record" : "New Student"}</h2>
+                </div>
+                {isEditing && (
+                  <button type="button" className="icon-action" aria-label="Batal edit" onClick={cancelEdit}>
+                    <X size={18} />
+                  </button>
+                )}
+              </div>
+
+              <label>
+                Nama
+                <input value={form.nama} onChange={(event) => setForm({ ...form, nama: event.target.value })} required />
+              </label>
+              <label>
+                NIM
+                <input value={form.nim} onChange={(event) => setForm({ ...form, nim: event.target.value })} required />
+              </label>
+              <label>
+                Jurusan
+                <input value={form.jurusan} onChange={(event) => setForm({ ...form, jurusan: event.target.value })} required />
+              </label>
+
+              <button className="primary-action" disabled={busy}>
+                {busy ? <Loader2 className="spin" size={18} /> : isEditing ? <Edit3 size={18} /> : <Plus size={18} />}
+                {isEditing ? "Update Student" : "Create Student"}
+              </button>
+            </form>
           </section>
         </section>
       </section>
-    </div>
+    </>
   );
 }
 
-function InfoCard({ icon, title, text }) {
+function MetricCard({ title, value }) {
   return (
-    <article className="info-card">
-      <div className="info-icon">{icon}</div>
-      <h2>{title}</h2>
-      <p>{text}</p>
-    </article>
-  );
-}
-
-function StatCard({ label, value }) {
-  return (
-    <article className="stat-card">
-      <span>{label}</span>
+    <div className="metric-card">
+      <span>{title}</span>
       <strong>{value}</strong>
-    </article>
+    </div>
   );
 }
 
